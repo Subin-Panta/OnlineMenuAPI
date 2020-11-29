@@ -1,50 +1,66 @@
 const { validationResult } = require('express-validator')
-
-exports.getItems = (req, res, next) => {
-	res.status(200).json({
-		items: [
-			{
-				name: 'MOMO',
-				price: '100'
-			},
-			{
-				name: 'Burger',
-				price: '150'
-			},
-			{
-				name: 'Pizza',
-				price: '250'
-			},
-			{
-				name: 'Chowmein',
-				price: '100'
-			},
-			{
-				name: 'Fried Rice',
-				price: '50'
-			},
-			{
-				name: 'Naan',
-				price: '100'
-			}
-		]
-	})
+const Item = require('../models/items')
+exports.getItems = async (req, res, next) => {
+	//need to fetch data from mongoDB
+	try {
+		const items = await Item.find()
+		res.status(200).json({
+			msg: 'Succesful Fetch',
+			items
+		})
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+			next(error)
+		}
+	}
 }
-exports.createMenu = (req, res, next) => {
+exports.createMenu = async (req, res, next) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
-		//use a error handling middleware but for now fuck it
-		return res.status(422).json({
-			message: 'entered Data is Incoorect',
-			errors: errors.array()
-		})
+		const error = new Error('Validation Failed, entered Datat is incorrect')
+		error.statusCode = 422
+		next(error)
 	}
 	const name = req.body.name
 	const price = req.body.price
 	const details = req.body.details
 	const imageUrl = req.body.imageUrl
-	//create it in Db
-	res.status(201).json({
-		message: 'Item Created'
+	const item = new Item({
+		name,
+		price,
+		details,
+		imageUrl
 	})
+	try {
+		const result = await item.save()
+		res.status(201).json({
+			result,
+			message: 'Item Created'
+		})
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+		}
+		next(error)
+	}
+}
+exports.getItem = async (req, res, next) => {
+	const Name = req.params.itemName
+
+	try {
+		const item = await Item.find({ name: Name })
+
+		if (!item) {
+			const error = new Error('No Such Item')
+			error.statusCode = 404
+			next(error)
+		}
+		res.status(200).json({ msg: 'Item Fetched', item })
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+			next(error)
+		}
+	}
 }

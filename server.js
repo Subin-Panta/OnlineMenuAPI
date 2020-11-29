@@ -1,4 +1,5 @@
 const express = require('express')
+const path = require('path')
 const config = require('config')
 const mongoose = require('mongoose')
 
@@ -9,6 +10,8 @@ const mongoURI = config.get('mongoURI')
 
 //bodyparser
 app.use(express.json()) // application/json
+//Statically serving images
+app.use('/images', express.static(path.join(__dirname, 'images')))
 //CORS ISSUE SOLVER
 app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Origin', '*')
@@ -21,6 +24,13 @@ app.use((req, res, next) => {
 })
 //routes
 app.use('/menu', menuRoutes)
+//error handling middleware
+app.use((error, req, res, next) => {
+	console.log('HERE MF', error)
+	const status = error.statusCode || 500
+	const message = error.message
+	res.status(status).json({ message })
+})
 //connecting to database
 const run = async () => {
 	try {
