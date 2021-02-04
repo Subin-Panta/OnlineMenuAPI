@@ -1,15 +1,15 @@
 const express = require('express')
 const { body } = require('express-validator')
-const mutler = require('mutler')
+const multer = require('multer')
 const router = express.Router()
 const menuController = require('../controllers/menu')
 
-const fileStorage = mutler.diskStorage({
+const fileStorage = multer.diskStorage({
 	desination: (req, file, cb) => {
 		cb(null, 'images')
 	},
 	filename: (req, file, cb) => {
-		cb(null)//eta dekhi baki
+		cb(null) //eta dekhi baki
 	}
 })
 

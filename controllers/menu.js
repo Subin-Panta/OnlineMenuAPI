@@ -18,7 +18,7 @@ exports.getItems = async (req, res, next) => {
 exports.createMenu = async (req, res, next) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
-		const error = new Error('Validation Failed, entered Datat is incorrect')
+		const error = new Error('Validation Failed, entered Data is incorrect')
 		error.statusCode = 422
 		next(error)
 	}
@@ -47,10 +47,8 @@ exports.createMenu = async (req, res, next) => {
 }
 exports.getItem = async (req, res, next) => {
 	const Name = req.params.itemName
-
 	try {
 		const item = await Item.find({ name: Name })
-
 		if (!item) {
 			const error = new Error('No Such Item')
 			error.statusCode = 404
