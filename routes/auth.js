@@ -1,22 +1,35 @@
 const express = require('express')
 const { body } = require('express-validator')
 const router = express.Router()
+const User = require('../models/user')
 const authController = require('../controllers/auth')
 router.post(
 	'/',
 	[
-		body('email')
-			.trim()
-			.isEmail()
-			.normalizeEmail()
-			.withMessage('Enter Valid Email'),
-		body('password')
-			.trim()
-			.not()
-			.isEmpty()
-			.isLength({ min: 6 })
-			.withMessage('6 chars minimum')
+		body('name').trim().not().isEmpty(),
+		body('email').trim().isEmail().normalizeEmail(),
+		body('password').trim().not().isEmpty().isLength({ min: 6 })
 	],
 	authController.createUser
+)
+router.post(
+	'/postLogin',
+	[
+		body('email').custom(async value => {
+			try {
+				const user = await User.find({ email: value })
+				if (!user) {
+					throw new Error('Invalid Credentials')
+				}
+				return true
+			} catch (error) {
+				if (!error.statusCode) {
+					error.statusCode = 500
+				}
+				next(error)
+			}
+		})
+	],
+	authController.validateUser
 )
 module.exports = router
