@@ -16,18 +16,11 @@ router.post(
 	'/postLogin',
 	[
 		body('email').custom(async value => {
-			try {
-				const user = await User.find({ email: value })
-				if (!user) {
-					throw new Error('Invalid Credentials')
-				}
-				return true
-			} catch (error) {
-				if (!error.statusCode) {
-					error.statusCode = 500
-				}
-				next(error)
+			const user = await User.find({ email: value })
+			if (!user.length) {
+				throw new Error('Invalid Credentials')
 			}
+			return true
 		})
 	],
 	authController.validateUser

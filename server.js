@@ -28,9 +28,9 @@ app.use('/menu', menuRoutes)
 app.use('/auth', authRoutes)
 //error handling middleware
 app.use((error, req, res, next) => {
-	console.log('HERE MF', error)
+	console.log(error)
 	const status = error.statusCode || 500
-	const message = error.message
+	const message = error.message ? error.message : error.msg ? error.msg : error
 	res.status(status).json({ message })
 })
 //connecting to database
@@ -41,7 +41,6 @@ const run = async () => {
 			useUnifiedTopology: true
 		})
 		console.log('mongoDb Connected')
-
 		app.listen(PORT)
 		console.log('listening in ' + PORT)
 	} catch (error) {
