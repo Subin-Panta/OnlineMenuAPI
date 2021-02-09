@@ -3,6 +3,7 @@ const { body } = require('express-validator')
 const router = express.Router()
 const User = require('../models/user')
 const authController = require('../controllers/auth')
+const authentication = require('../middleware/authentication')
 router.post(
 	'/',
 	[
@@ -25,4 +26,5 @@ router.post(
 	],
 	authController.validateUser
 )
+router.get('/dummy', authentication, authController.dummy)
 module.exports = router

@@ -2,13 +2,16 @@ const express = require('express')
 const path = require('path')
 const config = require('config')
 const mongoose = require('mongoose')
-
+const cookieparser = require('cookie-parser')
+//routes
 const menuRoutes = require('./routes/menu')
 const authRoutes = require('./routes/auth')
 const app = express()
 const PORT = process.env.port || 8000
 const mongoURI = config.get('mongoURI')
-
+const csrf = require('./middleware/csrfProtection')
+//cookieparser
+app.use(cookieparser())
 //bodyparser
 app.use(express.json()) // application/json
 //Statically serving images
@@ -23,7 +26,8 @@ app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 	next()
 })
-//routes
+//csrf protection
+app.use(csrf)
 app.use('/menu', menuRoutes)
 app.use('/auth', authRoutes)
 //error handling middleware

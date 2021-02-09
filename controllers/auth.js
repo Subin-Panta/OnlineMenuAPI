@@ -37,17 +37,27 @@ exports.validateUser = async (req, res, next) => {
 	}
 	const email = req.body.email
 	const password = req.body.password
+	const csrfToken = req.token
+
+	// console.log('yehi ho csrf token', csrfToken)
 	try {
 		const user = await User.findOne({ email })
+		if (!user) {
+			throw new Error('Invalid Credentials')
+		}
 		const result = await bcrypt.compare(password, user.password)
 		if (result) {
 			const secret = config.get('secret')
 			const payload = {
 				name: user.name,
-				email: user.email
+				email: user.email,
+				csrfToken
 			}
 			const token = jwt.sign(payload, secret, { expiresIn: '1h' })
-			return res.status(200).json({ token })
+			const HashedcsrfToken = await bcrypt.hash(csrfToken, 12)
+			return res.cookie('Token', token).send({ Id: user.id, HashedcsrfToken })
+
+			//return res.status(200).json({ msg: 'success' })
 		}
 		const error = new Error('Invalid Credentials')
 		throw error
@@ -57,4 +67,7 @@ exports.validateUser = async (req, res, next) => {
 		}
 		next(error)
 	}
+}
+exports.dummy = (req, res, next) => {
+	res.send('Big Dumb DUmb')
 }
