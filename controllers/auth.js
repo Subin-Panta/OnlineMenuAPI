@@ -57,8 +57,9 @@ exports.validateUser = async (req, res, next) => {
 			const token = jwt.sign(payload, secret, { expiresIn: '2h' })
 			const HashedcsrfToken = await bcrypt.hash(csrfToken, 12)
 			return res
+				.status(200)
 				.cookie('Token', token, { httpOnly: true, sameSite: 'LAX' })
-				.send({ Id: user.id, HashedcsrfToken })
+				.json({ Id: user.id, HashedcsrfToken, name: user.name })
 
 			//return res.status(200).json({ msg: 'success' })
 		}
@@ -76,7 +77,8 @@ exports.checkToken = async (req, res, next) => {
 	const cookie = req.cookies.Token
 	try {
 		const decode = await jwt.verify(cookie, secret)
-		res.status(200).json({ Id: decode.id })
+		const user = await User.findById(decode.id)
+		res.status(200).json({ Id: decode.id, name: user.name })
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500
@@ -86,4 +88,7 @@ exports.checkToken = async (req, res, next) => {
 }
 exports.dummy = (req, res, next) => {
 	res.send('Big Dumb DUmb')
+}
+exports.logout = (req, res, next) => {
+	return res.status(200).clearCookie('Token').json({ msg: 'cookie cleared' })
 }

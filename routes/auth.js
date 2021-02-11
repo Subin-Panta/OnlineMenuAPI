@@ -30,5 +30,6 @@ router.post(
 	authController.validateUser
 )
 router.get('/verifyToken', authentication, authController.checkToken)
+router.post('/logout', authentication, authController.logout)
 router.get('/dummy', authentication, authController.dummy)
 module.exports = router
