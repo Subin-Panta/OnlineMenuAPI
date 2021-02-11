@@ -4,6 +4,7 @@ const router = express.Router()
 const User = require('../models/user')
 const authController = require('../controllers/auth')
 const authentication = require('../middleware/authentication')
+const csrfprotection = require('../middleware/csrfProtection')
 router.post(
 	'/',
 	[
@@ -22,9 +23,12 @@ router.post(
 				throw new Error('Invalid Credentials')
 			}
 			return true
-		})
+		}),
+		csrfprotection
 	],
+
 	authController.validateUser
 )
+router.get('/verifyToken', authentication, authController.checkToken)
 router.get('/dummy', authentication, authController.dummy)
 module.exports = router

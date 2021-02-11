@@ -6,18 +6,18 @@ const jwt = require('jsonwebtoken')
 module.exports = authentication = async (req, res, next) => {
 	const cToken = req.headers['authorization']
 	const cookie = req.cookies.Token
-
+	console.log('header', cToken)
+	console.log('cookie', cookie)
+	if (!cToken || !cookie) {
+		return res.status(401).json({ msg: 'Not Authorized 1' })
+	}
 	try {
 		const decode = await jwt.verify(cookie, secret)
-		console.log('decoded', decode)
-		console.log(cToken)
 		const csToken = decode.csrfToken
-		console.log(csToken)
 		const result = await bcrypt.compare(csToken, cToken)
 		if (!result) {
-			return res.send('Not Authorized')
+			return res.status(401).json({ msg: 'Not Authorized' })
 		}
-		console.log('Matches')
 		next()
 	} catch (error) {
 		if (!error.statusCode) {

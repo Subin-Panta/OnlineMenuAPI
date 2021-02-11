@@ -49,18 +49,34 @@ exports.validateUser = async (req, res, next) => {
 		if (result) {
 			const secret = config.get('secret')
 			const payload = {
+				id: user._id,
 				name: user.name,
 				email: user.email,
 				csrfToken
 			}
-			const token = jwt.sign(payload, secret, { expiresIn: '1h' })
+			const token = jwt.sign(payload, secret, { expiresIn: '2h' })
 			const HashedcsrfToken = await bcrypt.hash(csrfToken, 12)
-			return res.cookie('Token', token).send({ Id: user.id, HashedcsrfToken })
+			return res
+				.cookie('Token', token, { httpOnly: true, sameSite: 'LAX' })
+				.send({ Id: user.id, HashedcsrfToken })
 
 			//return res.status(200).json({ msg: 'success' })
 		}
 		const error = new Error('Invalid Credentials')
 		throw error
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+		}
+		next(error)
+	}
+}
+exports.checkToken = async (req, res, next) => {
+	const secret = config.get('secret')
+	const cookie = req.cookies.Token
+	try {
+		const decode = await jwt.verify(cookie, secret)
+		res.status(200).json({ Id: decode.id })
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500

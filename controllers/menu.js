@@ -3,7 +3,7 @@ const Item = require('../models/items')
 exports.getItems = async (req, res, next) => {
 	// console.log(req)
 	// //need to fetch data from mongoDB
-	console.log('Cookies: ', req.cookies)
+	// console.log('Cookies: ', req.cookies)
 	try {
 		const items = await Item.find()
 		res.status(200).json({

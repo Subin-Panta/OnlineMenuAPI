@@ -9,7 +9,7 @@ const authRoutes = require('./routes/auth')
 const app = express()
 const PORT = process.env.port || 8000
 const mongoURI = config.get('mongoURI')
-const csrf = require('./middleware/csrfProtection')
+
 //cookieparser
 app.use(cookieparser())
 //bodyparser
@@ -26,8 +26,6 @@ app.use((req, res, next) => {
 	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 	next()
 })
-//csrf protection
-app.use(csrf)
 app.use('/menu', menuRoutes)
 app.use('/auth', authRoutes)
 //error handling middleware
