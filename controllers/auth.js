@@ -8,7 +8,7 @@ exports.createUser = async (req, res, next) => {
 	if (!errors.isEmpty()) {
 		const error = new Error('Enter Correct Data')
 		error.statusCode = 422
-		next(error)
+		return next(error)
 	}
 	const name = req.body.name
 	const email = req.body.email
@@ -26,7 +26,7 @@ exports.createUser = async (req, res, next) => {
 		if (!error.statusCode) {
 			error.statusCode = 500
 		}
-		next(error)
+		return next(error)
 	}
 }
 exports.validateUser = async (req, res, next) => {
@@ -69,7 +69,7 @@ exports.validateUser = async (req, res, next) => {
 		if (!error.statusCode) {
 			error.statusCode = 500
 		}
-		next(error)
+		return next(error)
 	}
 }
 exports.checkToken = async (req, res, next) => {
@@ -83,7 +83,7 @@ exports.checkToken = async (req, res, next) => {
 		if (!error.statusCode) {
 			error.statusCode = 500
 		}
-		next(error)
+		return next(error)
 	}
 }
 exports.dummy = (req, res, next) => {

@@ -3,6 +3,7 @@ const { body } = require('express-validator')
 const multer = require('multer')
 const router = express.Router()
 const menuController = require('../controllers/menu')
+const authentication = require('../middleware/authentication')
 
 const fileStorage = multer.diskStorage({
 	desination: (req, file, cb) => {
@@ -17,6 +18,7 @@ router.get('/', menuController.getItems)
 router.post(
 	'/',
 	[
+		authentication,
 		body('name')
 			.trim()
 			.isLength({ min: 2 })

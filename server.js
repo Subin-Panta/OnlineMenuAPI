@@ -3,18 +3,48 @@ const path = require('path')
 const config = require('config')
 const mongoose = require('mongoose')
 const cookieparser = require('cookie-parser')
+const multer = require('multer')
+const { v4: uuidv4 } = require('uuid')
 //routes
 const menuRoutes = require('./routes/menu')
 const authRoutes = require('./routes/auth')
 const app = express()
 const PORT = process.env.port || 8000
 const mongoURI = config.get('mongoURI')
-
-//cookieparser
-app.use(cookieparser())
+//fileStorage for multer
+const fileStorage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, 'images')
+	},
+	filename: (req, file, cb) => {
+		cb(null, uuidv4() + file.originalname)
+	}
+})
+const fileFilter = (req, file, cb) => {
+	if (
+		file.mimetype === 'image/png' ||
+		file.mimetype === 'image/jpg' ||
+		file.mimetype === 'image/jpeg'
+	) {
+		cb(null, true) //i.e null error and true means store
+	} else {
+		cb(null, false) //i.e no error and false means don't store
+	}
+}
 //bodyparser
 app.use(express.json()) // application/json
-//Statically serving images
+//cookieparser
+app.use(cookieparser())
+//file parser
+app.use(
+	multer({
+		storage: fileStorage,
+		fileFilter,
+		limits: { fileSize: 1024 * 1024 }
+	}).single('image')
+)
+
+//Statically serving images //static request to going to /images will be served from the path defined inside static function
 app.use('/images', express.static(path.join(__dirname, 'images')))
 //CORS ISSUE SOLVER
 app.use((req, res, next) => {

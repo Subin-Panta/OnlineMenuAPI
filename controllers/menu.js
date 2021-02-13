@@ -13,7 +13,7 @@ exports.getItems = async (req, res, next) => {
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500
-			next(error)
+			return next(error)
 		}
 	}
 }
@@ -22,12 +22,22 @@ exports.createMenu = async (req, res, next) => {
 	if (!errors.isEmpty()) {
 		const error = new Error('Validation Failed, entered Data is incorrect')
 		error.statusCode = 422
-		next(error)
+		return next(error)
 	}
 	const name = req.body.name
 	const price = req.body.price
 	const details = req.body.details
-	const imageUrl = req.body.imageUrl
+	const image = req.file
+	if (!image) {
+		const error = new Error(
+			'image is required and only .png,.jpg and .jpeg files are supported'
+		)
+		error.statusCode = 422
+		return next(error)
+	}
+	console.log(`Should'nt be reached`)
+	console.log(image)
+	const imageUrl = image.path
 	const item = new Item({
 		name,
 		price,
@@ -44,7 +54,7 @@ exports.createMenu = async (req, res, next) => {
 		if (!error.statusCode) {
 			error.statusCode = 500
 		}
-		next(error)
+		return next(error)
 	}
 }
 exports.getItem = async (req, res, next) => {
@@ -54,13 +64,13 @@ exports.getItem = async (req, res, next) => {
 		if (!item) {
 			const error = new Error('No Such Item')
 			error.statusCode = 404
-			next(error)
+			return next(error)
 		}
 		res.status(200).json({ msg: 'Item Fetched', item })
 	} catch (error) {
 		if (!error.statusCode) {
 			error.statusCode = 500
-			next(error)
+			return next(error)
 		}
 	}
 }
