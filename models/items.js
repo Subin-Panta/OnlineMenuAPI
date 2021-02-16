@@ -17,6 +17,10 @@ const itemSchema = new Schema(
 		imageUrl: {
 			type: String,
 			required: true
+		},
+		ingredients: {
+			type: [],
+			required: true
 		}
 	},
 	{ timestamps: true }

@@ -1,0 +1,4 @@
+WOrk on verifying the order.
+get price from backend dont supply it from front-end
+
+//need to add lazyloading and memoization techniques

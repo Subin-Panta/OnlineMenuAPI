@@ -3,6 +3,8 @@ const config = require('config')
 const bcrypt = require('bcryptjs')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const Item = require('../models/items')
+const mongoose = require('mongoose')
 exports.createUser = async (req, res, next) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
@@ -86,8 +88,72 @@ exports.checkToken = async (req, res, next) => {
 		return next(error)
 	}
 }
-exports.dummy = (req, res, next) => {
-	res.send('Big Dumb DUmb')
+exports.delete = async (req, res, next) => {
+	const id = req.params.itemid
+	const objectId = new mongoose.Types.ObjectId(id)
+
+	try {
+		const response = await Item.findOneAndDelete({ _id: objectId })
+		if (!response) {
+			return res.status(404).json({ msg: 'not found' })
+		}
+		res.status(200).json({ msg: 'deleted' })
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+		}
+		return next(error)
+	}
+}
+exports.edit = async (req, res, next) => {
+	const id = req.params.itemid
+
+	try {
+		const objectId = new mongoose.Types.ObjectId(id)
+		const oldData = await Item.find({ _id: objectId })
+		if (!oldData) {
+			const error = new Error('No Such Item')
+			error.statusCode = 404
+			throw error
+		}
+
+		let newIngredients = null
+		let newImageUrl = null
+		if (req.body.ingredients) {
+			newIngredients = req.body.ingredients.split(',').map(item => item.trim())
+		} else {
+			newIngredients = [...oldData[0].ingredients]
+		}
+		if (req.file) {
+			newImageUrl = req.file.path
+		} else {
+			newImageUrl = oldData[0].imageUrl
+		}
+		const newData = {
+			name: req.body.name || oldData[0].name,
+			price: req.body.price || oldData[0].price,
+			details:
+				req.body.details && req.body.details.length >= 10
+					? req.body.details
+					: oldData[0].details,
+			ingredients: newIngredients,
+			imageUrl: newImageUrl
+		}
+
+		const response = await Item.findOneAndUpdate(
+			{ _id: objectId },
+			{ ...newData }
+		)
+		if (!response) {
+			throw new Error('Try Again Later')
+		}
+		res.status(200).json({ msg: 'Updated' })
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+		}
+		return next(error)
+	}
 }
 exports.logout = (req, res, next) => {
 	return res.status(200).clearCookie('Token').json({ msg: 'cookie cleared' })

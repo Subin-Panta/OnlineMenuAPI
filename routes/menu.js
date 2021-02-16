@@ -1,18 +1,8 @@
 const express = require('express')
 const { body } = require('express-validator')
-const multer = require('multer')
 const router = express.Router()
 const menuController = require('../controllers/menu')
 const authentication = require('../middleware/authentication')
-
-const fileStorage = multer.diskStorage({
-	desination: (req, file, cb) => {
-		cb(null, 'images')
-	},
-	filename: (req, file, cb) => {
-		cb(null) //eta dekhi baki
-	}
-})
 
 router.get('/', menuController.getItems)
 router.post(
@@ -27,7 +17,8 @@ router.post(
 		body('details')
 			.trim()
 			.isLength({ min: 10 })
-			.withMessage('Minimum length is 10 characters Long')
+			.withMessage('Minimum length is 10 characters Long'),
+		body('ingredients').trim().not().isEmpty()
 	],
 	menuController.createMenu
 )

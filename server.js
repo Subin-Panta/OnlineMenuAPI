@@ -40,7 +40,7 @@ app.use(
 	multer({
 		storage: fileStorage,
 		fileFilter,
-		limits: { fileSize: 1024 * 1024 }
+		limits: { fileSize: 1024 * 1024 * 1024 * 1024 }
 	}).single('image')
 )
 
@@ -70,7 +70,8 @@ const run = async () => {
 	try {
 		await mongoose.connect(mongoURI, {
 			useNewUrlParser: true,
-			useUnifiedTopology: true
+			useUnifiedTopology: true,
+			useFindAndModify: false
 		})
 		console.log('mongoDb Connected')
 		app.listen(PORT)

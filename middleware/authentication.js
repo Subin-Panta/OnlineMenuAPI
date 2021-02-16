@@ -6,8 +6,7 @@ const jwt = require('jsonwebtoken')
 module.exports = authentication = async (req, res, next) => {
 	const cToken = req.headers['authorization']
 	const cookie = req.cookies.Token
-	console.log('header', cToken)
-	console.log('cookie', cookie)
+
 	if (!cToken || !cookie) {
 		return res.status(401).json({ msg: 'Not Authorized 1' })
 	}

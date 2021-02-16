@@ -18,6 +18,8 @@ exports.getItems = async (req, res, next) => {
 	}
 }
 exports.createMenu = async (req, res, next) => {
+	console.log(req.file)
+	console.log(req.body)
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
 		const error = new Error('Validation Failed, entered Data is incorrect')
@@ -27,6 +29,7 @@ exports.createMenu = async (req, res, next) => {
 	const name = req.body.name
 	const price = req.body.price
 	const details = req.body.details
+	const ingredients = req.body.ingredients
 	const image = req.file
 	if (!image) {
 		const error = new Error(
@@ -35,14 +38,15 @@ exports.createMenu = async (req, res, next) => {
 		error.statusCode = 422
 		return next(error)
 	}
-	console.log(`Should'nt be reached`)
-	console.log(image)
 	const imageUrl = image.path
+	const arryIngredients = ingredients.split(',').map(item => item.trim())
+
 	const item = new Item({
 		name,
 		price,
 		details,
-		imageUrl
+		imageUrl,
+		ingredients: arryIngredients
 	})
 	try {
 		const result = await item.save()
@@ -61,7 +65,7 @@ exports.getItem = async (req, res, next) => {
 	const Name = req.params.itemName
 	try {
 		const item = await Item.find({ name: Name })
-		if (!item) {
+		if (!(item.length > 0)) {
 			const error = new Error('No Such Item')
 			error.statusCode = 404
 			return next(error)

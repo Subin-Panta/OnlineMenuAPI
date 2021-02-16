@@ -31,5 +31,6 @@ router.post(
 )
 router.get('/verifyToken', authentication, authController.checkToken)
 router.post('/logout', authentication, authController.logout)
-router.get('/dummy', authentication, authController.dummy)
+router.post('/deleteItem/:itemid', authentication, authController.delete)
+router.post('/editItem/:itemid', authentication, authController.edit)
 module.exports = router
