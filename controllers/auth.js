@@ -5,6 +5,8 @@ const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const Item = require('../models/items')
 const mongoose = require('mongoose')
+const fs = require('fs/promises')
+const path = require('path')
 exports.createUser = async (req, res, next) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
@@ -80,6 +82,7 @@ exports.checkToken = async (req, res, next) => {
 	try {
 		const decode = await jwt.verify(cookie, secret)
 		const user = await User.findById(decode.id)
+
 		res.status(200).json({ Id: decode.id, name: user.name })
 	} catch (error) {
 		if (!error.statusCode) {
@@ -93,10 +96,14 @@ exports.delete = async (req, res, next) => {
 	const objectId = new mongoose.Types.ObjectId(id)
 
 	try {
+		const image = await Item.findOne({ _id: objectId })
 		const response = await Item.findOneAndDelete({ _id: objectId })
 		if (!response) {
 			return res.status(404).json({ msg: 'not found' })
 		}
+		const pathname = path.join(__dirname, `.././/${image.imageUrl}`)
+		console.log(pathname)
+		await fs.unlink(pathname)
 		res.status(200).json({ msg: 'deleted' })
 	} catch (error) {
 		if (!error.statusCode) {
@@ -106,12 +113,14 @@ exports.delete = async (req, res, next) => {
 	}
 }
 exports.edit = async (req, res, next) => {
+
 	const id = req.params.itemid
+	
 
 	try {
 		const objectId = new mongoose.Types.ObjectId(id)
 		const oldData = await Item.find({ _id: objectId })
-		if (!oldData) {
+		if (!(oldData.length > 0)) {
 			const error = new Error('No Such Item')
 			error.statusCode = 404
 			throw error
