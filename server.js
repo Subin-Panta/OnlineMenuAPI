@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid')
 //routes
 const menuRoutes = require('./routes/menu')
 const authRoutes = require('./routes/auth')
+const orderRoutes = require('./routes/order')
 const app = express()
 const PORT = process.env.port || 8000
 const mongoURI = config.get('mongoURI')
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
 })
 app.use('/menu', menuRoutes)
 app.use('/auth', authRoutes)
+app.use('/order', orderRoutes)
 //error handling middleware
 app.use((error, req, res, next) => {
 	console.log(error)

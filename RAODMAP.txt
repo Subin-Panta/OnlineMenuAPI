@@ -1,0 +1,2 @@
+//Serve Stream of pdf file from server using fs.createwriteStream
+//Nah better to just create using pdfkit and strem it as it is being created

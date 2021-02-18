@@ -23,4 +23,5 @@ router.post(
 	menuController.createMenu
 )
 router.get('/Item/:itemName', menuController.getItem)
+router.post('/order', menuController.order)
 module.exports = router
