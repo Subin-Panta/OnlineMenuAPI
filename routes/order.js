@@ -20,4 +20,9 @@ router.post(
 	orderController.orderBuiler
 )
 router.get('/getOrders', authentication, orderController.getAllOrders)
+router.get(
+	'/invoice/:invoiceId',
+	authentication,
+	orderController.getSingleOrder
+)
 module.exports = router

@@ -53,12 +53,13 @@ exports.orderBuiler = async (req, res, next) => {
 		//create pdfkit and stream data
 		const pdfDoc = new PDFDocument()
 		//setting header for letting browser know that its a pdf file
-		res.setHeader('Content-Type', 'application/pdf')
-		//header for setting file Name and opened in new tab
-		res.setHeader(
-			'Content-Disposition',
-			'inline; filename="' + invoiceName + '"'
-		)
+		//dont need to setheader cause i am hanlding stream on react with react code
+		// res.setHeader('Content-Type', 'application/pdf')
+		// //header for setting file Name and opened in new tab
+		// res.setHeader(
+		// 	'Content-Disposition',
+		// 	'inline; filename="' + invoiceName + '"'
+		// )
 		//pipe to witestream to create a write stream that saves file on the server
 		pdfDoc.pipe(fs.createWriteStream(invoicePath))
 		//pipe to res which is a writeable stream so that we can stream the created file to res
@@ -92,5 +93,21 @@ exports.getAllOrders = async (req, res, next) => {
 		}
 		return next(error)
 	}
+}
+exports.getSingleOrder = (req, res, next) => {
+	console.log('ayy bitch')
+	const invoiceId = req.params.invoiceId
+	//create a read Stream
+	const invoicePath = path.join(
+		__dirname,
+		`../data/invoices/Invoice-${invoiceId}.pdf`
+	)
+
+	const file = fs.createReadStream(invoicePath)
+	file.pipe(res)
+	file.on('error', error => {
+		next(error)
+	})
+	//pipe the read stream into res
 }
 //add route for deleting orders too need this once the orders can be checked off or not really a good idea since we might need invoices
