@@ -17,6 +17,9 @@ exports.createUser = async (req, res, next) => {
 	const name = req.body.name
 	const email = req.body.email
 	const password = req.body.password
+	//send email to the a fixed superUSER WHO HAS A TOKEN
+	//store an encrypted hashed id at the users base
+
 	try {
 		const hashedPassword = await bcrypt.hash(password, 12)
 		const user = new User({
@@ -113,9 +116,7 @@ exports.delete = async (req, res, next) => {
 	}
 }
 exports.edit = async (req, res, next) => {
-
 	const id = req.params.itemid
-	
 
 	try {
 		const objectId = new mongoose.Types.ObjectId(id)
