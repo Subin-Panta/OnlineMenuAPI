@@ -33,7 +33,12 @@ const fileFilter = (req, file, cb) => {
 	}
 }
 //bodyparser
-app.use(express.json()) // application/json
+app.use(express.json()) // parsing json data application/json
+app.use(
+	express.urlencoded({
+		extended: true
+	})
+) //parsing form data sent by form tag
 //cookieparser
 app.use(cookieparser())
 //file parser

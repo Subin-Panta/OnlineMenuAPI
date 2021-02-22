@@ -7,6 +7,12 @@ const Item = require('../models/items')
 const mongoose = require('mongoose')
 const fs = require('fs/promises')
 const path = require('path')
+const sgMail = require('@sendgrid/mail')
+const crypto = require('crypto')
+const sendGridKey = config.get('sendgridApiKey')
+const superUser = config.get('superUser')
+const sender = config.get('sender')
+sgMail.setApiKey(sendGridKey)
 exports.createUser = async (req, res, next) => {
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
@@ -17,16 +23,36 @@ exports.createUser = async (req, res, next) => {
 	const name = req.body.name
 	const email = req.body.email
 	const password = req.body.password
-	//send email to the a fixed superUSER WHO HAS A TOKEN
-	//store an encrypted hashed id at the users base
-
 	try {
 		const hashedPassword = await bcrypt.hash(password, 12)
+		const checkUser = await User.findOne({ email })
+		if (checkUser) {
+			throw new Error('User Already Exists')
+		}
+		const buffer = await crypto.randomBytes(32)
+		const token = buffer.toString('hex')
 		const user = new User({
 			name,
 			email,
-			password: hashedPassword
+			password: hashedPassword,
+			token,
+			tokenExpires: Date.now() + 900000
 		})
+
+		const msg = {
+			to: superUser,
+			from: sender, // Use the email address or domain you verified above
+			subject: 'Verify User to Continue',
+			html: `<form method="POST" action="http://localhost:8000/auth/verifyUser">
+			<input name='token' type="hidden"  value=${token} />
+			<input name='userId' type="hidden" value=${user._id} />
+            <button type="submit">Verify</button>
+            </form>`
+		}
+
+		//send email to the a fixed superUSER WHO HAS A TOKEN
+		//store an encrypted hashed id at the users base
+		await sgMail.send(msg)
 		await user.save()
 		res.status(201).json({ msg: 'User Created' })
 	} catch (error) {
@@ -167,4 +193,94 @@ exports.edit = async (req, res, next) => {
 }
 exports.logout = (req, res, next) => {
 	return res.status(200).clearCookie('Token').json({ msg: 'cookie cleared' })
+}
+exports.verify = async (req, res, next) => {
+	const code = req.body.token
+	const userId = req.body.userId
+	if (!code || !userId) {
+		return res.status(422).json({ msg: 'invalid Input' })
+	}
+	const userIdConverted = new mongoose.Types.ObjectId(userId)
+
+	const time = new Date()
+	const user = await User.findById({ _id: userIdConverted })
+	if (!user) {
+		return res.status(404).json({ msg: 'no User' })
+	}
+	if (!user.token || !user.tokenExpires) {
+		return res.status('500').json({ msg: 'Already Authenticated' })
+	}
+	if (!(time < user.tokenExpires) || user.token !== code) {
+		//if the token is expired{}
+		if (!(time < user.tokenExpires)) {
+			//update token
+			const buffer = await crypto.randomBytes(32)
+			const newToken = buffer.toString('hex')
+			//update database
+			user.token = newToken
+			user.tokenExpires = Date.now() + 900000
+			await user.save()
+			//resend token to mail
+			const msg = {
+				to: superUser,
+				from: sender, // Use the email address or domain you verified above
+				subject: 'Verify User to Continue',
+				html: `<form method="POST" action="http://localhost:8000/auth/verifyUser">
+				<input name='token' type="hidden"  value=${newToken} />
+				<input name='userId' type="hidden" value=${user._id} />
+				<button type="submit">Verify</button>
+				</form>`
+			}
+
+			//send email to the a fixed superUSER WHO HAS A TOKEN
+			await sgMail.send(msg)
+		}
+		return res.status(401).json({ msg: 'token invalid' })
+	} else {
+		user.verified = true
+		user.token = null
+		user.tokenExpires = null
+		await user.save()
+		return res.status(200).json({ msg: 'verified' })
+	}
+	//Since this is a post request if the code is expired
+	//generate new code and stuff it in the database
+	//check whether code matches and whether or not it is still valid for that user
+	//if not valid
+	//return INVALID TOKEN REQUEST TOKEN AGAIN FROM THE ONLINE MENU SITE
+}
+exports.list = async (req, res, next) => {
+	try {
+		const users = await User.find().select([
+			'-token',
+			'-password',
+			'-tokenExpires'
+		]) //get all users
+		if (!users) {
+			res.status(200).json({ msg: 'No Users' })
+		}
+		res.status(200).json({ users })
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+		}
+		return next(error)
+	}
+}
+exports.deleteUser = async (req, res, next) => {
+	const id = req.body.id
+	const userId = new mongoose.Types.ObjectId(id)
+	try {
+		const exists = User.findOne({ _id: userId })
+		if (!exists) {
+			throw new Error('No Such User')
+		}
+		const user = await User.findOneAndDelete({ _id: userId })
+		return res.status(200).json({ msg: 'User Deleted' })
+	} catch (error) {
+		if (!error.statusCode) {
+			error.statusCode = 500
+		}
+		return next(error)
+	}
 }

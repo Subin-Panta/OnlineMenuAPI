@@ -16,6 +16,12 @@ const userSchema = new Schema({
 	verified: {
 		type: Boolean,
 		default: false
+	},
+	token: {
+		type: String
+	},
+	tokenExpires : {
+		type: Date
 	}
 })
 module.exports = mongoose.model('User', userSchema)

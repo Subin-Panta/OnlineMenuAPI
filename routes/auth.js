@@ -29,8 +29,11 @@ router.post(
 
 	authController.validateUser
 )
-router.get('/verifyToken', authentication, authController.checkToken)
+router.get('/verifyToken', authController.checkToken)
 router.post('/logout', authentication, authController.logout)
 router.post('/deleteItem/:itemid', authentication, authController.delete)
 router.post('/editItem/:itemid', authentication, authController.edit)
+router.post('/verifyUser', authController.verify)
+router.get('/allUsers', authentication, authController.list)
+router.post('/deleteUser', authentication, authController.deleteUser)
 module.exports = router
