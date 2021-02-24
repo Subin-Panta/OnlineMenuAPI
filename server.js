@@ -9,7 +9,7 @@ const menuRoutes = require('./routes/menu')
 const authRoutes = require('./routes/auth')
 const orderRoutes = require('./routes/order')
 const app = express()
-const PORT = process.env.port
+const PORT = process.env.PORT
 const mongoURI = process.env.mongoURI
 //fileStorage for multer
 const fileStorage = multer.diskStorage({
