@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator')
-const config = require('config')
+
 const bcrypt = require('bcryptjs')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
@@ -9,9 +9,9 @@ const fs = require('fs/promises')
 const path = require('path')
 const sgMail = require('@sendgrid/mail')
 const crypto = require('crypto')
-const sendGridKey = config.get('sendgridApiKey')
-const superUser = config.get('superUser')
-const sender = config.get('sender')
+const sendGridKey = process.env.sendgridApiKey
+const superUser = process.env.superUser
+const sender = process.env.sender
 sgMail.setApiKey(sendGridKey)
 exports.createUser = async (req, res, next) => {
 	const errors = validationResult(req)
@@ -80,7 +80,7 @@ exports.validateUser = async (req, res, next) => {
 		}
 		const result = await bcrypt.compare(password, user.password)
 		if (result) {
-			const secret = config.get('secret')
+			const secret = process.env.secret
 			const payload = {
 				id: user._id,
 				name: user.name,
@@ -106,7 +106,7 @@ exports.validateUser = async (req, res, next) => {
 	}
 }
 exports.checkToken = async (req, res, next) => {
-	const secret = config.get('secret')
+	const secret = process.env.secret
 	const cookie = req.cookies.Token
 	try {
 		const decode = await jwt.verify(cookie, secret)

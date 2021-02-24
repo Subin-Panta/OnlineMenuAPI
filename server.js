@@ -1,6 +1,5 @@
 const express = require('express')
 const path = require('path')
-const config = require('config')
 const mongoose = require('mongoose')
 const cookieparser = require('cookie-parser')
 const multer = require('multer')
@@ -11,7 +10,7 @@ const authRoutes = require('./routes/auth')
 const orderRoutes = require('./routes/order')
 const app = express()
 const PORT = process.env.port || 8000
-const mongoURI = config.get('mongoURI')
+const mongoURI = process.env.mongoURI
 //fileStorage for multer
 const fileStorage = multer.diskStorage({
 	destination: (req, file, cb) => {

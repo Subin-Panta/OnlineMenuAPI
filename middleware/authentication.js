@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs')
-const config = require('config')
-const csrfSecret = config.get('csrfSecret')
-const secret = config.get('secret')
+
+const secret = process.env.secret
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const mongoose = require('mongoose')

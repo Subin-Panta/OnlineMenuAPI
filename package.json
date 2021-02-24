@@ -17,7 +17,6 @@
 		"express": "^4.17.1"
 	},
 	"dependencies": {
-		"config": "^3.3.2",
 		"express": "^4.17.1",
 		"@sendgrid/mail": "^7.4.2",
 		"bcrypt": "^5.0.0",
