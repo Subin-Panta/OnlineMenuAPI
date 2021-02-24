@@ -16,6 +16,11 @@ exports.orderBuiler = async (req, res, next) => {
 	const phoneNo = req.body.phoneNo
 	const address = req.body.address
 	const additionalDetails = req.body.additionalDetails || ''
+	if (req.body.order.length === 0) {
+		const er = new error('No orders')
+		er.statusCode(404)
+		next(er)
+	}
 	const recievedOrderData = req.body.order
 	console.log(recievedOrderData)
 	try {

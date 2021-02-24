@@ -10,7 +10,13 @@ router.post(
 	[
 		body('name').trim().not().isEmpty(),
 		body('email').trim().isEmail().normalizeEmail(),
-		body('password').trim().not().isEmpty().isLength({ min: 6 })
+		body('password').trim().not().isEmpty().isLength({ min: 6 }),
+		body('confirmPassword').custom((value, { req }) => {
+			if (value !== req.body.password) {
+				throw new Error('Password must match')
+			}
+			return true
+		})
 	],
 	authController.createUser
 )

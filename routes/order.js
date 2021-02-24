@@ -14,8 +14,7 @@ router.post(
 	[
 		body('name').trim().not().isEmpty(),
 		body('phoneNo').trim().not().isEmpty(),
-		body('address').trim().not().isEmpty(),
-		body('order').not().isEmpty()
+		body('address').trim().not().isEmpty()
 	],
 	orderController.orderBuiler
 )
