@@ -43,7 +43,7 @@ exports.createUser = async (req, res, next) => {
 			to: superUser,
 			from: sender, // Use the email address or domain you verified above
 			subject: 'Verify User to Continue',
-			html: `<form method="POST" action="http://localhost:8000/auth/verifyUser">
+			html: `<form method="POST" action='https://afternoon-tundra-60689.herokuapp.com/auth/verifyUser">
 			<input name='token' type="hidden"  value=${token} />
 			<input name='userId' type="hidden" value=${user._id} />
             <button type="submit">Verify</button>
