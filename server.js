@@ -48,13 +48,7 @@ app.use(
 		limits: { fileSize: 1024 * 1024 * 1024 * 1024 }
 	}).single('image')
 )
-//statically serving react folder i.e client folder
-app.use(express.static(path.join(__dirname, 'client', 'build')))
 
-// Right before your app.listen(), add this:
-app.get('*', (req, res) => {
-	res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
-})
 //Statically serving images //static request to going to /images will be served from the path defined inside static function
 app.use('/images', express.static(path.join(__dirname, 'images')))
 //CORS ISSUE SOLVER
@@ -76,9 +70,6 @@ app.use((error, req, res, next) => {
 	const status = error.statusCode || 500
 	const message = error.message ? error.message : error.msg ? error.msg : error
 	res.status(status).json({ message })
-})
-app.get('*', (req, res) => {
-	res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'))
 })
 //connecting to database
 const run = async () => {
